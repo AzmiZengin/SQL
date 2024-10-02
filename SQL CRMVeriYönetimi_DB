@@ -1,0 +1,146 @@
+CREATE DATABASE CRMVeriYonetimi
+CREATE TABLE Cariler (
+    CariID INT PRIMARY KEY IDENTITY(1,1), 
+    CariTuru NVARCHAR(50) NOT NULL CHECK (CariTuru IN ('Müşteri', 'Tedarikçi')), 
+    Adi NVARCHAR(100), 
+    Soyadi NVARCHAR(100), 
+    FirmaAdi NVARCHAR(150), 
+    Email NVARCHAR(100), 
+    Telefon NVARCHAR(20), 
+    Adres NVARCHAR(255), 
+    KayitTarihi DATE, 
+    DogumTarihi DATE, 
+    SorumluKisi NVARCHAR(100) 
+); 
+
+CREATE TABLE Depolar (
+    DepoID INT PRIMARY KEY IDENTITY(1,1), 
+    DepoAdi NVARCHAR(100) NOT NULL, 
+    DepoKonumu NVARCHAR(255), 
+    SorumluPersonel NVARCHAR(100), 
+    DepoKapasitesi INT 
+); 
+
+CREATE TABLE Urunler (
+    UrunID INT PRIMARY KEY IDENTITY(1,1), 
+    UrunAdi NVARCHAR(100) NOT NULL, 
+    Kategori NVARCHAR(100), 
+    Fiyat DECIMAL(10, 2), 
+    Tanim NVARCHAR(MAX), 
+    StokMiktari INT, 
+    MinimumStokSeviyesi INT, 
+    DepoID INT, 
+    FOREIGN KEY (DepoID) REFERENCES Depolar(DepoID) 
+); 
+
+CREATE TABLE Satislar (
+    SatisID INT PRIMARY KEY IDENTITY(1,1), 
+    CariID INT, 
+    UrunID INT, 
+    SatisTarihi DATE, 
+    SatisMiktari INT, 
+    ToplamFiyat DECIMAL(10, 2), 
+    OdemeYontemi NVARCHAR(50), 
+    DepoID INT, 
+    FaturaDurumu NVARCHAR(20) CHECK (FaturaDurumu IN ('Ödenmiş', 'Beklemede')), 
+    FOREIGN KEY (CariID) REFERENCES Cariler(CariID), 
+    FOREIGN KEY (UrunID) REFERENCES Urunler(UrunID), 
+    FOREIGN KEY (DepoID) REFERENCES Depolar(DepoID) 
+); 
+
+CREATE TABLE Siparisler (
+    SiparisID INT PRIMARY KEY IDENTITY(1,1), 
+    CariID INT, 
+    SiparisTarihi DATE, 
+    TeslimatAdresi NVARCHAR(255), 
+    SiparisDurumu NVARCHAR(20) CHECK (SiparisDurumu IN ('Beklemede', 'Onaylandı', 'İptal Edildi')), 
+    ToplamTutar DECIMAL(10, 2), 
+    FOREIGN KEY (CariID) REFERENCES Cariler(CariID) 
+); 
+
+CREATE TABLE SatinAlma (
+    SatinAlmaID INT PRIMARY KEY IDENTITY(1,1), 
+    CariID INT, 
+    UrunID INT, 
+    SatinAlmaTarihi DATE, 
+    SatinAlmaMiktari INT, 
+    SatinAlmaFiyati DECIMAL(10, 2), 
+    DepoID INT, 
+    FOREIGN KEY (CariID) REFERENCES Cariler(CariID), 
+    FOREIGN KEY (UrunID) REFERENCES Urunler(UrunID), 
+    FOREIGN KEY (DepoID) REFERENCES Depolar(DepoID) 
+); 
+
+CREATE TABLE Faturalar (
+    FaturaID INT PRIMARY KEY IDENTITY(1,1), 
+    SiparisID INT, 
+    FaturaTarihi DATE, 
+    FaturaTutari DECIMAL(10, 2), 
+    FaturaDurumu NVARCHAR(20) CHECK (FaturaDurumu IN ('Ödenmiş', 'Ödenmemiş')), 
+    FOREIGN KEY (SiparisID) REFERENCES Siparisler(SiparisID) 
+); 
+
+CREATE TABLE Odemeler (
+    OdemeID INT PRIMARY KEY IDENTITY(1,1), 
+    CariID INT, 
+    SatisID INT, 
+    OdemeTarihi DATE, 
+    OdemeTutari DECIMAL(10, 2), 
+    OdemeYontemi NVARCHAR(50), 
+    FOREIGN KEY (CariID) REFERENCES Cariler(CariID), 
+    FOREIGN KEY (SatisID) REFERENCES Satislar(SatisID) 
+);
+
+INSERT INTO Cariler (CariTuru, Adi, Soyadi, FirmaAdi, Email, Telefon, Adres, KayitTarihi, DogumTarihi, SorumluKisi)
+VALUES 
+('Müşteri', 'Arslanlar','KRAL', 'Arslanlar Ticaret', 'arslanlar@example.com', '555-0001', 'İstanbul, Türkiye', GETDATE(), '1980-01-10', 'Ali Vatansever'),
+('Müşteri', 'Aylin', 'Kara', 'Aylin Gıda', 'aylin.kara@example.com', '555-0002', 'Ankara, Türkiye', GETDATE(), '1992-03-22', 'Mehmet Demir'),
+('Müşteri', 'Mehmet', 'Yılmaz', 'Yılmaz Elektronik', 'mehmet.yilmaz@example.com', '555-0003', 'İzmir, Türkiye', GETDATE(), '1985-06-15', 'Zeynep Koç'),
+('Tedarikçi', 'Ahmet', 'Kaplan', 'Kaplanlar', 'kaplanlar@example.com', '555-1001', 'İstanbul, Türkiye', GETDATE(), '1980-05-15', 'Fatma Çelik'),
+('Tedarikçi', 'Hasan', 'Yıldız', 'Yıldız Ltd.', 'yildizltd@example.com', '555-1002', 'Ankara, Türkiye', GETDATE(), '1975-07-25', 'Ahmet Yılmaz'),
+('Tedarikçi', 'Emre', 'Beyaz', 'Beyaz A.Ş.', 'beyazas@example.com', '555-1003', 'İzmir, Türkiye', GETDATE(), '1990-09-30', 'Emre Tuncer');
+
+INSERT INTO Depolar (DepoAdi, DepoKonumu, SorumluPersonel, DepoKapasitesi)
+VALUES 
+('Depo 1', 'Ankara', 'Ahmet Yılmaz', 1000),
+('Depo 2', 'İstanbul', 'Mehmet Demir', 1200),
+('Depo 3', 'İzmir', 'Zeynep Koç', 800);
+
+INSERT INTO Urunler (UrunAdi, Kategori, Fiyat, Tanim, StokMiktari, MinimumStokSeviyesi, DepoID)
+VALUES 
+('Ürün A', 'Gıda', 100.00, 'Açıklama A', 50, 10, 1),
+('Ürün B', 'Gıda', 150.00, 'Açıklama B', 30, 5, 2),
+('Ürün C', 'Elektronik', 200.00, 'Açıklama C', 20, 3, 3),
+('Ürün D', 'Gıda', 50.00, 'Açıklama D', 100, 20, 1),
+('Ürün E', 'Elektronik', 250.00, 'Açıklama E', 15, 2, 2),
+('Ürün F', 'Gıda', 75.00, 'Açıklama F', 60, 12, 3);
+
+INSERT INTO Siparisler (CariID, SiparisTarihi, TeslimatAdresi, SiparisDurumu, ToplamTutar)
+VALUES 
+(1, GETDATE(), 'İstanbul, Türkiye', 'Beklemede', 300.00),
+(2, GETDATE(), 'Ankara, Türkiye', 'Onaylandı', 450.00),
+(3, GETDATE(), 'İzmir, Türkiye', 'İptal Edildi', 200.00);
+
+INSERT INTO Satislar (CariID, UrunID, SatisTarihi, SatisMiktari, ToplamFiyat, OdemeYontemi, DepoID, FaturaDurumu)
+VALUES 
+(1, 1, GETDATE(), 2, 200.00, 'Kredi Kartı', 1, 'Ödenmiş'),
+(2, 2, GETDATE(), 3, 450.00, 'Nakit', 2, 'Beklemede'),
+(3, 3, GETDATE(), 1, 200.00, 'Kredi Kartı', 3, 'Ödenmiş');
+
+INSERT INTO SatinAlma (CariID, UrunID, SatinAlmaTarihi, SatinAlmaMiktari, SatinAlmaFiyati, DepoID)
+VALUES 
+(4, 4, GETDATE(), 5, 250.00, 1),
+(5, 5, GETDATE(), 2, 500.00, 2),
+(6, 6, GETDATE(), 10, 750.00, 3);
+
+INSERT INTO Faturalar (SiparisID, FaturaTarihi, FaturaTutari, FaturaDurumu)
+VALUES 
+(1, GETDATE(), 200.00, 'Ödenmiş'),
+(2, GETDATE(), 450.00, 'Ödenmemiş'),
+(3, GETDATE(), 200.00, 'Ödenmiş');
+
+INSERT INTO Odemeler (CariID, SatisID, OdemeTarihi, OdemeTutari, OdemeYontemi)
+VALUES 
+(1, 1, GETDATE(), 200.00, 'Kredi Kartı'),
+(2, 2, GETDATE(), 450.00, 'Nakit'),
+(3, 3, GETDATE(), 200.00, 'Kredi Kartı');
