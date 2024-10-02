@@ -1,0 +1,109 @@
+--CREATE DATABASE EczaneDB;
+CREATE TABLE Tedarikci (
+    TedarikciID INT IDENTITY(1,1) PRIMARY KEY,
+    TedarikciAdi VARCHAR(255) NOT NULL,
+    Telefon VARCHAR(20),
+    Adres TEXT
+);
+
+
+CREATE TABLE Depo (
+    DepoID INT IDENTITY(1,1) PRIMARY KEY,
+    DepoAdi VARCHAR(255),
+    Konum VARCHAR(255),
+    SorumluKisi VARCHAR(255)
+);
+
+CREATE TABLE Cari (
+    CariID INT IDENTITY(1,1) PRIMARY KEY,
+    CariAdi VARCHAR(255) NOT NULL,
+    Telefon VARCHAR(20),
+    Adres TEXT,
+    VergiNumarasi VARCHAR(20)
+);
+
+CREATE TABLE Ilac (
+    IlacID INT IDENTITY(1,1) PRIMARY KEY,
+    Barkod VARCHAR(100) NOT NULL,
+    IlacAdi VARCHAR(255) NOT NULL,
+    TedarikciID INT,
+    Fiyat DECIMAL(10, 2),
+    SonKullanmaTarihi DATE,
+    StokMiktari INT,
+    FOREIGN KEY (TedarikciID) REFERENCES Tedarikci(TedarikciID) ON DELETE SET NULL
+);
+
+CREATE TABLE Fatura (
+    FaturaID INT IDENTITY(1,1) PRIMARY KEY,
+    CariID INT,
+    Tutar DECIMAL(10, 2),
+    FaturaTarihi DATE,
+    OdemeDurumu VARCHAR(50),
+    FOREIGN KEY (CariID) REFERENCES Cari(CariID) ON DELETE SET NULL
+);
+
+CREATE TABLE Irsaliye (
+    IrsaliyeID INT IDENTITY(1,1) PRIMARY KEY,
+    FaturaID INT,
+    CariID INT,
+    IlacID INT,
+    Miktar INT,
+    SevkTarihi DATE,
+    FOREIGN KEY (FaturaID) REFERENCES Fatura(FaturaID) ON DELETE SET NULL,
+    FOREIGN KEY (CariID) REFERENCES Cari(CariID) ON DELETE SET NULL,
+    FOREIGN KEY (IlacID) REFERENCES Ilac(IlacID) ON DELETE SET NULL
+);
+
+CREATE TABLE Sevk (
+    SevkID INT IDENTITY(1,1) PRIMARY KEY,
+    IrsaliyeID INT,
+    DepoID INT,
+    SevkTarihi DATE,
+    SevkDurumu VARCHAR(50),
+    FOREIGN KEY (IrsaliyeID) REFERENCES Irsaliye(IrsaliyeID) ON DELETE SET NULL,
+    FOREIGN KEY (DepoID) REFERENCES Depo(DepoID) ON DELETE SET NULL
+);
+
+CREATE TABLE Envanter (
+    EnvanterID INT IDENTITY(1,1) PRIMARY KEY,
+    IlacID INT,
+    DepoID INT,
+    StokSeviyesi INT,
+    SonGuncellemeTarihi DATE,
+    FOREIGN KEY (IlacID) REFERENCES Ilac(IlacID) ON DELETE SET NULL,
+    FOREIGN KEY (DepoID) REFERENCES Depo(DepoID) ON DELETE SET NULL
+);
+
+CREATE TABLE Hasta (
+    HastaID INT IDENTITY(1,1) PRIMARY KEY,
+    HastaAdi VARCHAR(255),
+    TCKimlikNo VARCHAR(11),
+    DogumTarihi DATE,
+    Cinsiyet VARCHAR(10)
+);
+
+CREATE TABLE Recete (
+    ReceteID INT IDENTITY(1,1) PRIMARY KEY,
+    HastaID INT,
+    DoktorID INT,
+    ReceteTarihi DATE,
+    IlacID INT,
+    KullanimTalimatlari TEXT,
+    FOREIGN KEY (HastaID) REFERENCES Hasta(HastaID) ON DELETE CASCADE,
+    FOREIGN KEY (DoktorID) REFERENCES Doktor(DoktorID) ON DELETE SET NULL,
+    FOREIGN KEY (IlacID) REFERENCES Ilac(IlacID) ON DELETE SET NULL
+);
+
+CREATE TABLE Doktor (
+    DoktorID INT IDENTITY(1,1) PRIMARY KEY,
+    DoktorAdi VARCHAR(255),
+    Uzmanlik VARCHAR(255),
+    Telefon VARCHAR(20)
+);
+CREATE TABLE EczanePersoneli (
+    PersonelID INT IDENTITY(1,1) PRIMARY KEY,
+    Ad VARCHAR(255),
+    Soyad VARCHAR(255),
+    Gorev VARCHAR(100),
+    Telefon VARCHAR(20)
+);
